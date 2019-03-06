@@ -26,7 +26,7 @@ Options:
 
 # TODO
 
-- [] Reads quality distribution
-- [] Reads length density
-- [] GC content
+- [ ] Reads quality distribution
+- [ ] Reads length density
+- [ ] GC content
 
