@@ -11,16 +11,39 @@ if sys.platform is not 'darwin':
     mpl.use('Agg')
 import matplotlib.pyplot as plt
 
+REVERSE_DIC = {
+    "A": "T",
+    "T": "A",
+    "G": "C",
+    "C": "G",
+    "N": "N"
+}
+
+NUC_ORDER = {
+    "A": 1,
+    "T": 2,
+    "G": 3,
+    "C": 4,
+    "N": 5
+
+}
+
 
 def nucplot(countsdict,
             fileprefix=None,
             fig_bw={'figsize': (8, 6)},
-            rev=False):
+            rev_axis=False,
+            rev_nuc=False
+            ):
     """
 
-    :param countdict:
+    :param countsdict:
+    :param fileprefix:
+    :param fig_bw:
+    :param rev: rev means for reverse the axis numbers
     :return:
     """
+
     nucs = [
         "A",
         "T",
@@ -44,7 +67,12 @@ def nucplot(countsdict,
             else:
                 nuc_percent[pos][nuc] = 0.
     for nuc in nucs:
-        if rev:
+
+        # here to reverse the base
+        if rev_nuc:
+            nuc = REVERSE_DIC[nuc]
+        # here to add reverse the position
+        if rev_axis:
             axes.plot(positions, [nuc_percent[pos][nuc] for pos in positions[::-1]])
         else:
             axes.plot(positions, [nuc_percent[pos][nuc] for pos in positions])
@@ -53,9 +81,15 @@ def nucplot(countsdict,
     axes.set_position([box.x0, box.y0, box.width, box.height])
 
     axes.set_axisbelow(True)
-    axes.set_title('Base content')
-    axes.set_xlabel('Position')
+    axes.set_title('Base content (reversed)' if rev_nuc else 'Base content')
+    axes.set_xlabel('Position (reversed)' if rev_axis else 'Position')
     axes.set_ylabel('Base content (% basecall)')
+
+    # if rev_nuc:
+    #     legendlabel = tuple((REVERSE_DIC[n] for n in nucs), key=lambda x: NUC_ORDER[x])
+    #
+    # else:
+    #     legendlabel = tuple((n for n in nucs))
 
     legend = axes.legend(
         tuple((n for n in nucs)),

@@ -4,10 +4,11 @@
 __author__ = 'Zhou Ran'
 
 import sys
+import logging
 import gzip
 from collections import defaultdict, Counter
 
-
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(asctime)s:%(message)s")
 
 
 def gc(seq):
@@ -194,11 +195,15 @@ class Stats:
         pass
 
 
-
-
 if __name__ == '__main__':
     s = Stats()
+    COUNTINFO = 1000000
+    c_count = 1
     for line in FastqReader('R2.r1.fq'):
+        if c_count % COUNTINFO == 0:
+            logging.info('processed {} reads.'.format(c_count))
+            c_count += 1
+
         s.evaluate(line.seq, line.qual)
 
     # print(list(map(lambda x: x["G"], s.nuc.values())))
