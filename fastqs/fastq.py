@@ -4,11 +4,8 @@
 __author__ = 'Zhou Ran'
 
 import sys
-import logging
 import gzip
 from collections import defaultdict, Counter
-
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(asctime)s:%(message)s")
 
 
 def gc(seq):
@@ -41,6 +38,7 @@ class FastqReader:
 
     def __next__(self):
         return self.next()
+
 
     def next(self):
         try:
@@ -195,16 +193,38 @@ class Stats:
         pass
 
 
-if __name__ == '__main__':
-    s = Stats()
-    COUNTINFO = 1000000
-    c_count = 1
-    for line in FastqReader('R2.r1.fq'):
-        if c_count % COUNTINFO == 0:
-            logging.info('processed {} reads.'.format(c_count))
-            c_count += 1
+def statnucfromfile(file):
+    """
+    Read the file and return same data structure as the class Stats return
+    :param file:
+    :return:
+    """
+    resdic = defaultdict(lambda: defaultdict(int))
+    with open(file) as fh:
+        for line in fh:
+            if line.startswith(','): continue
 
-        s.evaluate(line.seq, line.qual)
+            line = line.strip().split(',')
+            label = line[0]
+            countinfo = line[1:]
+            for loc in range(1, len(countinfo) + 1):
+                resdic[loc][label] = float(countinfo[loc - 1])
+
+    return resdic
+
+
+if __name__ == '__main__':
+    # print(statnucfromfile('../example/revtest.2.nulc_dis.txt'))
+    # s = Stats()
+    # COUNTINFO = 1000000
+    # c_count = 1
+    # for line in FastqReader('R2.r1.fq'):
+    #     if c_count % COUNTINFO == 0:
+    #         logging.info('processed {} reads.'.format(c_count))
+    #         c_count += 1
+    #
+    #     s.evaluate(line.seq, line.qual)
 
     # print(list(map(lambda x: x["G"], s.nuc.values())))
-    plot(s.nuc)
+    # plot(s.nuc)
+    nucplot(statnucfromfile('../example/revtest.2.nulc_dis.txt'), 'test')

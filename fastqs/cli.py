@@ -5,12 +5,19 @@ __author__ = 'Zhou Ran'
 
 import sys
 import click
+import logging
+import pandas as pd
 
-from .fastq import Stats, FastqReader
+from .fastq import Stats, FastqReader, statnucfromfile
 from .plot import nucplot
 
-if __name__ == '__main__':
-    plot()
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(asctime)s:%(message)s")
+
+
+@click.group()
+def cli():
+    """A command line tools to plot fastq stats"""
+    pass
 
 
 @click.command()
@@ -28,14 +35,14 @@ if __name__ == '__main__':
               is_flag=True,
               help='Reverse the nucleobase, defaule:False.'
               )
-def plot(fq,
-         fp,
-         revx,
-         revn):
+def fqplot(fq,
+           fp,
+           revx,
+           revn):
     """Stat the fastq file and plot the base distribution plot"""
 
     if not all([fq, fp]):
-        plot(['plot', '--help'])
+        cli(['fqplot', '--help'])
         sys.exit(1)
 
     COUNTINFO = 1000000
@@ -45,12 +52,51 @@ def plot(fq,
     for line in FastqReader(fq):
         if c_count % COUNTINFO == 0:
             logging.info('processed {} reads.'.format(c_count))
-            c_count += 1
+        c_count += 1
         s.evaluate(line.seq, line.qual)
 
-    # print(list(map(lambda x: x["G"], s.nuc.values())))
-
+    pdm = pd.DataFrame.from_dict(s.nuc)
+    pdm.to_csv('{}.nulc_dis.txt'.format(fp), na_rep=0)
     nucplot(s.nuc,
             fileprefix=fp,
             rev_axis=revx,
             rev_nuc=revn)
+
+
+@click.command()
+@click.option('--file',
+              type=str,
+              help='The nuc config file')
+@click.option('--fp',
+              type=str,
+              help='The outputfile prefix(fp).')
+@click.option('--revx',
+              is_flag=True,
+              help='Reverse the base location(x axis), defaule:False.'
+              )
+@click.option('--revn',
+              is_flag=True,
+              help='Reverse the nucleobase, defaule:False.'
+              )
+def nucfile(
+        file,
+        fp,
+        revx,
+        revn):
+    """Fast way to plot the saved information"""
+    if not all([file, fp]):
+        cli(['nucfile', '--help'])
+        sys.exit(1)
+
+    s = statnucfromfile(file)
+    nucplot(s,
+            fileprefix=fp,
+            rev_axis=revx,
+            rev_nuc=revn)
+
+
+cli.add_command(fqplot)
+cli.add_command(nucfile)
+
+if __name__ == '__main__':
+    cli()

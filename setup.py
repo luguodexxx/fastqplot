@@ -30,7 +30,7 @@ setup(name='fastqs',
       ],
       entry_points={
           'console_scripts': [
-              'fastqplot=fastqs.cli:plot'
+              'fqplot=fastqs.cli:cli'
           ],
       },
       )

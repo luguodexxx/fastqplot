@@ -77,6 +77,7 @@ def nucplot(countsdict,
         else:
             axes.plot(positions, [nuc_percent[pos][nuc] for pos in positions])
 
+    axes.set_ylim(-5, 105)
     box = axes.get_position()
     axes.set_position([box.x0, box.y0, box.width, box.height])
 
