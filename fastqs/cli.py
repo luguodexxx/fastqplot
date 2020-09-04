@@ -27,6 +27,11 @@ def cli():
 @click.option('--fp',
               type=str,
               help='The outputfile prefix(fp).')
+@click.option('--maxlen',
+              type=int,
+              default=300,
+              help='The max length of reads for stat')
+
 @click.option('--revx',
               is_flag=True,
               help='Reverse the base location(x axis), defaule:False.'
@@ -37,6 +42,7 @@ def cli():
               )
 def fqplot(fq,
            fp,
+           maxlen,
            revx,
            revn):
     """Stat the fastq file and plot the base distribution plot"""
@@ -53,7 +59,7 @@ def fqplot(fq,
         if c_count % COUNTINFO == 0:
             logging.info('processed {} reads.'.format(c_count))
         c_count += 1
-        s.evaluate(line.seq, line.qual)
+        s.evaluate(line.seq, line.qual, max_len=maxlen)
 
     pdm = pd.DataFrame.from_dict(s.nuc)
     pdm.to_csv('{}.nulc_dis.txt'.format(fp), na_rep=0)

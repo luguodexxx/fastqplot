@@ -3,7 +3,6 @@
 # @Time    : 2019/3/5 4:05 PM
 __author__ = 'Zhou Ran'
 
-import sys
 import gzip
 from collections import defaultdict, Counter
 
@@ -38,7 +37,6 @@ class FastqReader:
 
     def __next__(self):
         return self.next()
-
 
     def next(self):
         try:
@@ -167,18 +165,25 @@ class Stats:
         self.kmers = Counter(defaultdict(int))
         self.conv = defaultdict(lambda: defaultdict(int))
 
-    def evaluate(self, seq, qual, conv=None):
-        """ Evaluate read object at each position, and fill in nuc and qual dictionaries """
+    def evaluate(self, seq, qual, max_len=300, conv=None):
+        """
+        Evaluate read object at each position, and fill in nuc and qual dictionaries 
+        """
         self.gc[gc(seq)] += 1
-        if conv:
-            cpgs = cpg_map(seq)
-        for i in range(1, len(seq) + 1):
+        # if conv:
+        #     cpgs = cpg_map(seq)
+        if len(seq) >= max_len:
+            len_use = max_len
+        else:
+            len_use = len(seq)
+
+        for i in range(1, len_use + 1):
             self.depth[i] += 1
             self.nuc[i][seq[i - 1]] += 1
             self.qual[i][qual[i - 1]] += 1
-            if conv:
-                if cpgs[i - 1] != 'N':
-                    self.conv[i][conv[i - 1]] += 1
+            # if conv:
+            #     if cpgs[i - 1] != 'N':
+            #         self.conv[i][conv[i - 1]] += 1
 
     def kmercount(self, seq, k=5):
         """ Count all kmers of k length in seq and update kmer counter.
